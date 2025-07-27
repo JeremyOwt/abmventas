@@ -1,4 +1,23 @@
 <?php
+require_once 'config_override.php';
+
+if (getenv('IS_PRODUCTION')) {
+    $mysqli = new mysqli(
+        ConfigOverride::$BBDD_HOST,
+        ConfigOverride::$BBDD_USUARIO,
+        ConfigOverride::$BBDD_CLAVE,
+        ConfigOverride::$BBDD_NOMBRE,
+        ConfigOverride::$BBDD_PORT
+    );
+} else {
+    $mysqli = new mysqli(
+        Config::BBDD_HOST,
+        Config::BBDD_USUARIO,
+        Config::BBDD_CLAVE,
+        Config::BBDD_NOMBRE,
+        Config::BBDD_PORT
+    );
+}
 
 class Localidad{
     private $idlocalidad;
