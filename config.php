@@ -18,6 +18,3 @@ class Config {
     const BBDD_NOMBRE = "abmventas";
 
 }
-
-
-?>

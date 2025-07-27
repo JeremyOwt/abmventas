@@ -198,4 +198,4 @@ class Usuario {
         return password_verify($claveIngresada, $claveEnBBDD);
     }
 }
-?>
+
