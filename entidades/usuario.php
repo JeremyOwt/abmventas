@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../conexion.php';
- $mysqli = obtenerConexion();
+
 class Usuario {
     private $idusuario;
     private $usuario;
@@ -33,9 +33,7 @@ class Usuario {
     }
 
     public function insertar(){
-        //Instancia la clase mysqli con el constructor parametrizado
-        $mysqli = new mysqli(Config::BBDD_HOST, Config::BBDD_USUARIO, Config::BBDD_CLAVE, Config::BBDD_NOMBRE, Config::BBDD_PORT);
-        //Arma la query
+        $mysqli = obtenerConexion();
         $sql = "INSERT INTO usuarios (
                     usuario, 
                     clave, 
@@ -49,23 +47,19 @@ class Usuario {
                     '" . $this->apellido ."',
                     '" . $this->correo ."'
                 );";
-        //Ejecuta la query
         if (!$mysqli->query($sql)) {
             printf("Error en query: %s\n", $mysqli->error . " " . $sql);
         }
-        //Obtiene el id generado por la inserción
         $this->idusuario = $mysqli->insert_id;
-        //Cierra la conexión
         $mysqli->close();
     }
 
     public function actualizar(){
-
-        $mysqli = new mysqli(Config::BBDD_HOST, Config::BBDD_USUARIO, Config::BBDD_CLAVE, Config::BBDD_NOMBRE, Config::BBDD_PORT);
+        $mysqli = obtenerConexion();
         $sql = "";
 
         if($this->clave != ""){
-        $sql = "UPDATE usuarios SET
+            $sql = "UPDATE usuarios SET
                 usuario = '$this->usuario',
                 nombre = '$this->nombre',
                 apellido = '$this->apellido',
@@ -73,7 +67,7 @@ class Usuario {
                 correo = '$this->correo'
                 WHERE idusuario = " . $this->idusuario;
         } else {
-        $sql = "UPDATE usuarios SET
+            $sql = "UPDATE usuarios SET
                 usuario = '$this->usuario',
                 nombre = '$this->nombre',
                 apellido = '$this->apellido',
@@ -87,9 +81,8 @@ class Usuario {
     }
 
     public function eliminar(){
-        $mysqli = new mysqli(Config::BBDD_HOST, Config::BBDD_USUARIO, Config::BBDD_CLAVE, Config::BBDD_NOMBRE, Config::BBDD_PORT);
+        $mysqli = obtenerConexion();
         $sql = "DELETE FROM usuarios WHERE idusuario = " . $this->idusuario;
-        //Ejecuta la query
         if (!$mysqli->query($sql)) {
             printf("Error en query: %s\n", $mysqli->error . " " . $sql);
         }
@@ -97,7 +90,7 @@ class Usuario {
     }
 
     public function obtenerPorId(){
-        $mysqli = new mysqli(Config::BBDD_HOST, Config::BBDD_USUARIO, Config::BBDD_CLAVE, Config::BBDD_NOMBRE, Config::BBDD_PORT);
+        $mysqli = obtenerConexion();
         $sql = "SELECT idusuario, 
                         usuario, 
                         clave,
@@ -109,8 +102,6 @@ class Usuario {
         if (!$resultado = $mysqli->query($sql)) {
             printf("Error en query: %s\n", $mysqli->error . " " . $sql);
         }
-
-        //Convierte el resultado en un array asociativo
         if($fila = $resultado->fetch_assoc()){
             $this->idusuario = $fila["idusuario"];
             $this->usuario = $fila["usuario"];
@@ -123,7 +114,7 @@ class Usuario {
     }
 
     public function obtenerPorUsuario($usuario, $idusuario=""){
-        $mysqli = new mysqli(Config::BBDD_HOST, Config::BBDD_USUARIO, Config::BBDD_CLAVE, Config::BBDD_NOMBRE, Config::BBDD_PORT);
+        $mysqli = obtenerConexion();
         $sql = "SELECT idusuario, 
                         usuario, 
                         clave,
@@ -135,8 +126,6 @@ class Usuario {
         if (!$resultado = $mysqli->query($sql)) {
             printf("Error en query: %s\n", $mysqli->error . " " . $sql);
         }
-
-        //Convierte el resultado en un array asociativo
         if($fila = $resultado->fetch_assoc()){
             $this->idusuario = $fila["idusuario"];
             $this->usuario = $fila["usuario"];
@@ -148,11 +137,11 @@ class Usuario {
         } else {
             return false;
         }
-
         $mysqli->close();
     }
+
     public function obtenerPorCorreo($correo, $idusuario=""){
-        $mysqli = new mysqli(Config::BBDD_HOST, Config::BBDD_USUARIO, Config::BBDD_CLAVE, Config::BBDD_NOMBRE, Config::BBDD_PORT);
+        $mysqli = obtenerConexion();
         $sql = "SELECT idusuario, 
                         usuario, 
                         clave,
@@ -164,8 +153,6 @@ class Usuario {
         if (!$resultado = $mysqli->query($sql)) {
             printf("Error en query: %s\n", $mysqli->error . " " . $sql);
         }
-
-        //Convierte el resultado en un array asociativo
         if($fila = $resultado->fetch_assoc()){
             $this->idusuario = $fila["idusuario"];
             $this->usuario = $fila["usuario"];
@@ -177,21 +164,17 @@ class Usuario {
         } else {
             return false;
         }
-            
         $mysqli->close();
     }
-    
 
     public function obtenerTodos(){
-        $mysqli = new mysqli(Config::BBDD_HOST, Config::BBDD_USUARIO, Config::BBDD_CLAVE, Config::BBDD_NOMBRE, Config::BBDD_PORT);
+        $mysqli = obtenerConexion();
         $sql = "SELECT idusuario, usuario, clave, nombre, apellido, correo FROM usuarios";
         if (!$resultado = $mysqli->query($sql)) {
             printf("Error en query: %s\n", $mysqli->error . " " . $sql);
         }
-
         $aResultado = array();
         if($resultado){
-            //Convierte el resultado en un array asociativo
             while($fila = $resultado->fetch_assoc()){
                 $entidadAux = new Usuario();
                 $entidadAux->idusuario = $fila["idusuario"];
@@ -203,19 +186,16 @@ class Usuario {
                 $aResultado[] = $entidadAux;
             }
         }
+        $mysqli->close();
         return $aResultado;
     }
 
     public function encriptarClave($clave){
-        $claveEncriptada = password_hash($clave, PASSWORD_DEFAULT);
-        return $claveEncriptada;
+        return password_hash($clave, PASSWORD_DEFAULT);
     }
 
     public function verificarClave($claveIngresada, $claveEnBBDD){
         return password_verify($claveIngresada, $claveEnBBDD);
     }
-
 }
-
-
 ?>
