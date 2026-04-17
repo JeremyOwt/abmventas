@@ -9,20 +9,25 @@ $usuario = new Usuario();
 $usuario->cargarFormulario($_REQUEST);
 
 if ($_POST) {
-
-    $usuarioAux = new Usuario();
-
-    if ($usuarioAux->obtenerPorUsuario($usuario->usuario, $usuario->idusuario));{
-    // YA EXISTE UN NOMBRE CON ESTE USUARIO MOSTRAR MENSAJE
-        $msg = "El usuario ya existe";
-
+    if (!verificarCsrfToken($_POST["csrf_token"] ?? "")) {
+        die("Error de seguridad (CSRF).");
     }
 
-    if ($usuarioAux->obtenerPorCorreo($usuario->correo, $usuario->idusuario)) {
+    $usuarioAux = new Usuario();
+    $hayError = false;
+
+    if ($usuarioAux->obtenerPorUsuario($usuario->usuario, $usuario->idusuario)){
+    // YA EXISTE UN NOMBRE CON ESTE USUARIO MOSTRAR MENSAJE
+        $msg = "El usuario ya existe";
+        $hayError = true;
+    }
+
+    if (!$hayError && $usuarioAux->obtenerPorCorreo($usuario->correo, $usuario->idusuario)) {
     // YA EXISTE UN NOMBRE CON ESTE CORREO MOSTRAR MENSAJE 
         $msg = "El correo ya existe";
+        $hayError = true;
     } else {
-    
+    if (!$hayError) {
     if (isset($_POST["btnGuardar"])) {
         if (isset($_GET["id"]) && $_GET["id"] > 0) {
             //Actualizo un usuario existente
@@ -35,6 +40,7 @@ if ($_POST) {
     } else if (isset($_POST["btnBorrar"])) {
         $usuario->eliminar();
         header("Location: usuario-listado.php");
+    }
     }
 }
 }
@@ -97,4 +103,4 @@ include_once "header.php";
 
       </div>
       <!-- End of Main Content -->
-<?php include_once "footer.php";
+<?php include_once "footer.php"; ?>

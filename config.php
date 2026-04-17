@@ -18,3 +18,20 @@ class Config {
     const BBDD_NOMBRE = "abmventas";
 
 }
+
+if (!function_exists('obtenerCsrfToken')) {
+    function obtenerCsrfToken()
+    {
+        if (empty($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
+        return $_SESSION['csrf_token'];
+    }
+}
+
+if (!function_exists('verificarCsrfToken')) {
+    function verificarCsrfToken($tokenRecibido)
+    {
+        return isset($_SESSION['csrf_token']) && is_string($tokenRecibido) && hash_equals($_SESSION['csrf_token'], $tokenRecibido);
+    }
+}

@@ -13,6 +13,10 @@ $cliente->cargarFormulario($_REQUEST);
 $pg = "Listado de clientes";
 
 if ($_POST) {
+    if (!verificarCsrfToken($_POST["csrf_token"] ?? "")) {
+        die("Error de seguridad (CSRF).");
+    }
+
     if (isset($_POST["btnGuardar"])) {
         if (isset($_GET["id"]) && $_GET["id"] > 0) {
             //Actualizo un cliente existente
@@ -86,7 +90,7 @@ include_once "header.php";
                 </div>
                 <div class="col-6 form-group">
                     <label for="txtCorreo">Correo:</label>
-                    <input type="" class="form-control" name="txtCorreo" id="txtCorreo" required value="<?php echo $cliente->correo ?>">
+                    <input type="email" class="form-control" name="txtCorreo" id="txtCorreo" required value="<?php echo $cliente->correo ?>">
                 </div>
                 <div class="col-6 form-group">
                     <label for="txtTelefono">Teléfono:</label>
@@ -124,6 +128,7 @@ include_once "header.php";
                             <?php endif;?>
                         <?php endfor;?> ?>
                     </select>
+                    <input type="hidden" name="txtFechaNac" id="txtFechaNac" value="<?php echo $cliente->fecha_nac; ?>">
                 </div>
             </div>
             <div class="row">
@@ -168,9 +173,20 @@ include_once "header.php";
       <!-- End of Main Content -->
 <script>
 $(document).ready( function () {
-    var idCliente = '<?php echo isset($cliente) && $cliente->idcliente > 0 ? $cliente->idcliente : 0 ?>';
-
+    fActualizarFechaNacimiento();
+    $("#txtDiaNac, #txtMesNac, #txtAnioNac").on("change", fActualizarFechaNacimiento);
 } );
+
+ function fActualizarFechaNacimiento(){
+    const dia = $("#txtDiaNac").val();
+    const mes = $("#txtMesNac").val();
+    const anio = $("#txtAnioNac").val();
+    if (dia && mes && anio && dia !== "DD" && mes !== "MM" && anio !== "YYYY") {
+      const diaFmt = String(dia).padStart(2, '0');
+      const mesFmt = String(mes).padStart(2, '0');
+      $("#txtFechaNac").val(`${anio}-${mesFmt}-${diaFmt}`);
+    }
+ }
 
  function fBuscarLocalidad(){
             idProvincia = $("#lstProvincia option:selected").val();

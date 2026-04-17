@@ -23,19 +23,25 @@ class Cliente
         $this->cuit = isset($request["txtCuit"]) ? $request["txtCuit"] : "";
         $this->correo = isset($request["txtCorreo"]) ? $request["txtCorreo"] : "";
         $this->telefono = isset($request["txtTelefono"]) ? $request["txtTelefono"] : "";
-        $this->fecha_nac = isset($request["txtFechaNac"]) ? $request["txtFechaNac"] : "";
+        if (isset($request["txtFechaNac"]) && $request["txtFechaNac"] !== "") {
+            $this->fecha_nac = $request["txtFechaNac"];
+        } elseif (isset($request["txtAnioNac"], $request["txtMesNac"], $request["txtDiaNac"]) && $request["txtAnioNac"] !== "" && $request["txtMesNac"] !== "" && $request["txtDiaNac"] !== "") {
+            $this->fecha_nac = sprintf("%04d-%02d-%02d", intval($request["txtAnioNac"]), intval($request["txtMesNac"]), intval($request["txtDiaNac"]));
+        } else {
+            $this->fecha_nac = "";
+        }
         $this->fk_idprovincia = isset($request["lstProvincia"]) ? $request["lstProvincia"] : "";
     }
 
     public function insertar()
     {
         $mysqli = new mysqli(Config::BBDD_HOST, Config::BBDD_USUARIO, Config::BBDD_CLAVE, Config::BBDD_NOMBRE, Config::BBDD_PORT);
-        $sql = "INSERT INTO clientes (nombre, cuit, correo, telefono, fecha_nac) VALUES (
+        $sql = "INSERT INTO clientes (nombre, cuit, correo, telefono, fecha_nac, fk_idprovincia) VALUES (
             '$this->nombre',
             '$this->cuit',
             '$this->correo',
             '$this->telefono',
-            '$this->fecha_nac'
+            '$this->fecha_nac',
             $this->fk_idprovincia
         );";
         $mysqli->query($sql);

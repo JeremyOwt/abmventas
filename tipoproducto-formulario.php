@@ -7,12 +7,15 @@ $pg = "Tipo de Producto";
 $tipoProducto = new tipoProducto();
 
 if($_POST){
+    if (!verificarCsrfToken($_POST["csrf_token"] ?? "")) {
+        die("Error de seguridad (CSRF).");
+    }
     //CREO LOS DATOS
     if(isset($_POST["btnGuardar"])){
         $tipoProducto = new TipoProducto();
         $tipoProducto->cargarFormulario($_REQUEST);
 
-        if (isset($_GET["id"]) && $_GET["id"] >=0){
+        if (isset($_GET["id"]) && $_GET["id"] > 0){
              
             //ACTUALIZO LOS DATOS 
             $tipoProducto->actualizar();
@@ -25,6 +28,11 @@ if($_POST){
 
         $msg["texto"] = "Guardado correctamente";
         $msg["codigo"] = "alert-success";
+    } elseif (isset($_POST["btnBorrar"]) && isset($_GET["id"]) && $_GET["id"] > 0) {
+        $tipoProducto->idtipoproducto = intval($_GET["id"]);
+        $tipoProducto->eliminar();
+        header("Location: tipoproducto-listado.php");
+        exit;
     }
 }
 //OBTIENE LOS DATOS POR POSICION DEL ID PARA EDITARLO 
