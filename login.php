@@ -6,10 +6,16 @@ error_reporting(E_ALL);
 include_once "entidades/usuario.php";
 include_once "config.php";
 
-$claveEncriptada = password_hash("admin123", PASSWORD_DEFAULT);
+if (isset($_SESSION["nombre"]) && $_SESSION["nombre"] !== "") {
+  header("location: index.php");
+  exit;
+}
 
 //Es postback?
 if ($_POST) {
+  if (!verificarCsrfToken($_POST["csrf_token"] ?? "")) {
+    $msg = "Error de seguridad (CSRF).";
+  } else {
   $txtUsuario = $_POST["txtUsuario"];
   $txtClave = $_POST["txtClave"];
 
@@ -17,12 +23,15 @@ if ($_POST) {
   $entidadUsuario->obtenerPorUsuario($txtUsuario);
 
   if ($txtUsuario == $entidadUsuario->usuario && password_verify($txtClave, $entidadUsuario->clave)) {
+    session_regenerate_id(true);
     $_SESSION["nombre"] = $entidadUsuario->nombre . " " . $entidadUsuario->apellido;
     header("location: index.php");
+    exit;
 
     //Si no es correcto la clave o el usuario mostrar en pantalla "Usuario o clave incorrecto"
   } else {
     $msg = "Usuario o clave incorrecto";
+  }
   }
 }
 
@@ -91,6 +100,7 @@ if ($_POST) {
                     <h1 class="h4 text-gray-900 mb-4">Bienvenido</h1>
                   </div>
                   <form action="" method="POST" class="user">
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(obtenerCsrfToken()); ?>">
                     <?php if (isset($msg)): ?>
                       <div class="alert alert-danger" role="alert">
                         <?php echo $msg; ?>

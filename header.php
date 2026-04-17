@@ -1,8 +1,17 @@
 <?php
 include_once "config.php";
+if (!isset($_SESSION["nombre"]) || $_SESSION["nombre"] === "") {
+  header("Location: login.php");
+  exit;
+}
+
 if (isset($_POST["btnCerrar"])){
+  if (!verificarCsrfToken($_POST["csrf_token"] ?? "")) {
+    die("Error de seguridad (CSRF).");
+  }
   session_destroy();
   header("Location: login.php");
+  exit;
 }
 
 ?>
@@ -52,6 +61,7 @@ if (isset($_POST["btnCerrar"])){
 
 <body id="page-top">
 <form action="" method="POST" enctype="multipart/form-data">
+  <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(obtenerCsrfToken()); ?>">
 
   <!-- Page Wrapper -->
   <div id="wrapper">
